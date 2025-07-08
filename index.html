@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>表現技法デジタルブック</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet" />
+
+    <style>
+        /* フォント設定 */
+        body {
+          font-family: 'Noto Sans JP', 'Inter', sans-serif;
+        }
+        /* カスタムスクロールバー */
+        ::-webkit-scrollbar {
+          width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+          background: #e0e0e0;
+          border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: #6366f1;
+          border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: #4f46e5;
+        }
+        /* アコーディオンのアニメーション用 */
+        .accordion-content {
+          overflow: hidden;
+          transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out, margin-top 0.5s ease-in-out;
+          max-height: 0;
+          opacity: 0;
+          margin-top: 0;
+        }
+        .accordion-content.open {
+          max-height: 5000px; /* 十分な高さを確保 */
+          opacity: 1;
+          margin-top: 1rem; /* mt-4 */
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-100 to-indigo-200 p-4 font-inter text-gray-800">
+
+    <header class="mb-8 text-center">
+        <h1 class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-fuchsia-700 drop-shadow-lg">
+          表現技法デジタルブック
+        </h1>
+        <p class="mt-3 text-lg text-gray-700">文章表現を豊かにする様々な技法を学びましょう。</p>
+    </header>
+
+    <main id="app-container" class="max-w-4xl mx-auto bg-white bg-opacity-80 backdrop-blur-sm rounded-3xl shadow-xl p-6 md:p-8 lg:p-10 border border-gray-200">
+        </main>
+
+    <footer class="mt-12 text-center text-gray-500 text-sm">
+        <p>&copy; 2025 表現技法デジタルブック. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // --- データ ---
+        const categories = [
+            {
+                title: 'I. 言葉の選び方・意味に関わる表現技法（修辞技法）',
+                techniques: [
+                    { name: '直喩（ちょくゆ）', definition: 'ある物事を、別の物事に直接的にたとえる。「〜のようだ」「〜みたい」「まるで〜」「あたかも〜」「さながら〜」などを使って表現する。', examples: ['彼は氷のように冷たい人だ。', '天使の歌声のような、美しい歌声だ。'] },
+                    { name: '隠喩（いんゆ）', definition: 'ある物事を、別の物事に暗示的にたとえる。直喩のような「〜のようだ」といった言葉を使わないのが特徴。「AはBだ」の形で表現されることが多い。メタファーとも言う。', examples: ['彼の心はガラス細工だ。（壊れやすく繊細であることの暗示）', '人生は航海だ。（多くの困難を乗り越えて進んでいく様子を暗示）'] },
+                    { name: '擬人法（ぎじんほう）', definition: '人間以外のもの（動物、植物、無生物、概念など）を、人間のように見立てて感情や行動があるかのように表現する。', examples: ['空が泣いている。', '椅子が私の帰りを待っている。', '時間が足早に過ぎ去る。'] },
+                    { name: '活喩法（かつゆほう）', definition: '無生物を、まるで生きているかのように生き生きと表現する。擬人法の一種と見なされることもある。', examples: ['怒れる波が岸壁に襲いかかる。', '歴史が大きくうねりを上げる。'] },
+                    { name: '換喩（かんゆ）', definition: 'ある事柄を、それと密接に関連する別の言葉で置き換えて表現する。メトニミーとも言う。', examples: ['ペンは剣よりも強し。（「ペン」で言論や思想の力を示す）', '赤坂から連絡があった。（「赤坂」で特定の会社や組織を示す）'] },
+                    { name: '提喩（ていゆ）', definition: 'ある事柄の上位概念を下位概念で、またはその逆で表現する。部分をもって全体を表したり、全体で部分を表したりする技法。シネクドキーとも言う。', examples: ['お茶を飲む。（「お茶」で休憩すること全体を示す）', '花見に行く。（「花」で桜を指す）'] },
+                    { name: '象徴（しょうちょう）', definition: '具体的な事物を用いて、それとは別の抽象的な概念や思想、価値観などを表すこと。シンボル。', examples: ['鳩は平和の象徴だ。', '白い色は、純粋さの象徴とされる。'] },
+                    { name: '比喩（ひゆ）', definition: '直喩、隠喩、擬人法、換喩、提喩など、何かを別のものにたとえる表現技法の総称。', examples: [] },
+                    { name: '暗喩（あんゆ）', definition: '隠喩（メタファー）とほぼ同じ意味で使われる。', examples: [] },
+                    { name: '諷喩（ふうゆ）', definition: '教訓や風刺的な意味を、直接的ではなく、たとえ話などによって間接的に示すこと。イソップ寓話などが代表的。アレゴリー。', examples: ['「アリとキリギリス」（勤勉の重要性を説く）'] },
+                    { name: '寓意（ぐうい）', definition: '諷喩（アレゴリー）と同じ意味で使われることが多い。物語や作品全体に込められた、より深い教訓や別の意味合いを指す。', examples: [] },
+                ]
+            },
+            {
+                title: 'II. 語順・構造に関わる表現技法',
+                techniques: [
+                    { name: '倒置法（とうちほう）', definition: '通常の語順を意図的に入れ替えることで、特定の言葉を強調したり、読者に強い印象や余韻を与えたりする。', examples: ['見たこともない、あの美しい景色は。（通常：あの美しい景色は見たこともない）'] },
+                    { name: '挿入法（そうにゅうほう）', definition: '文の途中に、補足的な説明や話し手の感情などを括弧や読点を用いて挟み込む。', examples: ['彼は、そう、疑いようもなく、正直な人物だ。'] },
+                    { name: '同語反復（どうごはんぷく）', definition: '同じ、または似た意味の言葉を繰り返すこと。意図的に用いることで意味を強調する効果があるが、単に冗長な表現になる場合もある。', examples: ['まず最初にやるべきこと。（意図的な強調）', '頭痛が痛い。（誤用として有名）'] },
+                    { name: '省略法（しょうりゃくほう）', definition: '文脈から分かる要素（主語や述語など）をあえて省略することで、簡潔にしたり、余韻や緊張感を生み出したりする。', examples: ['僕はうなぎ。君はカツ丼。（「僕はうなぎを注文する」などを省略）'] },
+                    { name: '体言止め（たいげんどめ）', definition: '文末を名詞（体言）で終えることで、力強さや断定的な響き、余韻などを生む。', examples: ['今日の目標は、完全勝利。', '目の前に広がる、紺碧の海。'] },
+                    { name: '用言止め（ようげんどめ）', definition: '文末を動詞・形容詞・形容動詞（用言）の活用形で終える。文に動きや変化を与える基本的な表現。', examples: ['夕日が沈む。', '空がどこまでも青い。'] },
+                    { name: '係り結び', definition: '主に古文で用いられる文法規則。文中に係助詞「ぞ・なむ・や・か・こそ」があると、文末の活用語が特定の形（連体形や已然形）に変化する。現代文では「〜こそすれ」といった言い方に名残が見られる。', examples: ['雨ぞ降る。（「ぞ」があるため、文末の「降る」は連体形）', '花こそ咲け。（「こそ」があるため、文末の「咲け」は已然形）'] },
+                ]
+            },
+            {
+                title: 'III. 音・リズムに関わる表現技法',
+                techniques: [
+                  { name: '反復法（はんぷくほう）', definition: '同じ、あるいは類似の語句や文を繰り返すことで、意味を強調し、リズムや感動を生み出す。', examples: ['まだだ、まだ終われない。', '進め、進め、光の差す方へ。'] },
+                  { name: '対句（ついく）', definition: '意味や形が対になる二つの句を並べて、表現にリズムと深みを与える。', examples: ['山は高く、海は深い。', '去る者は追わず、来る者は拒まず。'] },
+                  { name: '畳語（じょうご）', definition: '同じ語を重ねて用いることで、意味を強調したり、言葉の響きを豊かにしたりする。オノマトペでよく見られる。', examples: ['きらきら', '人々', '山々'] },
+                  { name: '押韻（おういん）', definition: '詩や歌詞などで、文の特定の位置（特に文末）で母音や子音の響きが似た言葉を使い、音のリズムを整える。ライム。', examples: ['夜空の彼方、愛しいあなた。'] },
+                  { name: '音象徴（おんしょうちょう）', definition: '擬音語・擬態語（オノマトペ）を用いて、物事の音や状態、動きを感覚的に表現する。', examples: ['雨がざあざあ降る。（擬音語）', '星がきらきら輝く。（擬態語）'] },
+                ]
+            },
+            {
+                title: 'IV. 論理・意味の展開に関わる表現技法',
+                techniques: [
+                    { name: '対比（たいひ）', definition: '対照的な二つの事柄を並べて示すことで、それぞれの違いを際立たせ、主題を鮮明にする。', examples: ['光と影', '都市の喧騒と田舎の静寂'] },
+                    { name: '対照（たいしょう）', definition: '対比とほぼ同じ意味で使われる。', examples: [] },
+                    { name: '逆説（ぎゃくせつ）', definition: '一見すると常識に反する、矛盾したような表現でありながら、その奥に深い真理を含んだ表現。パラドックス。', examples: ['負けるが勝ち。', '急がば回れ。'] },
+                    { name: '撞着語法（どうちゃくごほう）', definition: '互いに矛盾する意味の言葉を組み合わせることで、新たなニュアンスや深い意味を生み出す表現。オクシモロン。', examples: ['公然の秘密', '無慈悲な親切', '優しい嘘'] },
+                    { name: '引用（いんよう）', definition: '他者の言葉や文章を、自身の文章の中に用いる。権威付けや説得力を高める効果がある。', examples: ['デカルトは「我思う、故に我あり」と言った。'] },
+                    { name: '反語（はんご）', definition: 'わざと疑問の形で表現することで、実際にはその逆の強い断定（肯定または否定）を意味する。', examples: ['これが傑作と言えようか。（いや、傑作とは言えない）', '誰がそんなことを信じるものか。（いや、誰も信じない）'] },
+                    { name: '設疑法（せつぎほう）', definition: '読者や聞き手に問いかけることで、注意を引きつけ、共に考えさせる効果を狙う。必ずしも答えを必要としない。', examples: ['幸福とは一体何なのだろうか。'] },
+                    { name: '修辞的疑問（しゅうじてきぎもん）', definition: '反語と似ているが、強い断定ではなく、問いかけの形で詠嘆や情緒を表現したり、読者の関心を引いたりする目的で使われる。', examples: ['この美しい夕日を、どう言葉にすればよいのだろう。'] },
+                    { name: '列挙（れっきょ）', definition: 'いくつかの事柄を次々と並べることで、内容を具体的に示したり、リズムを生んだり、意味を強調したりする。', examples: ['彼の部屋には、本、雑誌、書類、文房具が散乱していた。'] },
+                ]
+            },
+            {
+                title: 'V. 強調・感情に関わる表現技法',
+                techniques: [
+                    { name: '誇張法（こちょうほう）', definition: '物事を実際よりもはるかに大げさに、あるいは小さく表現することで、印象を強くする。', examples: ['猫の額ほどの庭。', '天にも昇る気持ちだ。'] },
+                    { name: '漸層法（ぜんそうほう）', definition: '表現のスケールや重要度を、段階的に強めたり大きくしたりしていくことで、高揚感や期待感を盛り上げる。', examples: ['一つの村を、国を、そして全世界を動かす力。'] },
+                    { name: '漸降法（ぜんこうほう）', definition: '漸層法とは逆に、表現を段階的に弱めたり小さくしたりしていくことで、物事の収束や落ち着きを表現する。', examples: ['彼の怒りは叫びから、つぶやきへ、そして沈黙へと変わった。'] },
+                    { name: '感嘆（かんたん）', definition: '喜び、悲しみ、驚きなどの強い感情を、感嘆符（！）や「ああ」「まあ」といった感嘆詞を用いて表現する。', examples: ['なんと美しいのだろう！', 'ああ、素晴らしい景色だ。'] },
+                    { name: '呼びかけ', definition: '文章の途中で、特定の人物や事物、あるいは読者に対して語りかける形式を取ることで、親近感や臨場感を出す。', examples: ['友よ、思い出してほしい。', 'ああ、故郷の山よ。'] },
+                    { name: '命令形の使用', definition: '命令の形で言い切ることで、強い意志や要求、感情の高ぶりを示す。', examples: ['立て！', '決して諦めるな！'] },
+                ]
+            },
+            {
+                title: 'VI. 描写・表現の工夫に関わる表現技法',
+                techniques: [
+                    { name: '具体化（ぐたいか）', definition: '抽象的な概念を、具体的な事物やエピソードに置き換えて分かりやすく表現する。', examples: ['彼の優しさは、道端で凍える子猫をそっと抱き上げたその姿に表れていた。（「優しさ」という抽象概念を具体的な行動で示す）'] },
+                    { name: '抽象化（ちゅうしょうか）', definition: '具体的な事柄の中から共通する要素を抜き出し、一般的な概念や本質として表現する。', examples: ['喜び、怒り、悲しみ、楽しみ。それら全てが人生の彩りだ。（具体的な感情を「人生の彩り」と抽象化）'] },
+                    { name: '情景描写（じょうけいびょうしゃ）', definition: 'ある場所の風景や場面の様子を、視覚・聴覚・嗅覚などの五感に訴えるように言葉で描き出す。', examples: ['雨上がりのアスファルトの匂いが立ち上り、西の空には七色の虹が架かっていた。'] },
+                    { name: '心理描写（しんりびょうしゃ）', definition: '登場人物の心の中の思い、感情、葛藤などを直接的、または間接的に描き出す。', examples: ['彼の口は笑っていたが、心の中では不安の嵐が吹き荒れていた。'] },
+                    { name: 'オノマトペ（擬音語・擬態語）', definition: '⇒ III. 音象徴 を参照。', examples: [] },
+                    { name: '色彩表現（しきさいひょうげん）', definition: '様々な色の名前を用いて、情景を鮮やかにしたり、登場人物の心情や雰囲気を暗示したりする。', examples: ['漆黒の闇が辺りを包み込む。', '彼女はバラ色の未来を夢見ていた。'] },
+                ]
+            },
+            {
+                title: 'VII. 文全体の構成・論理に関わる表現技法',
+                techniques: [
+                    { name: '起承転結（きしょうてんけつ）', definition: '文章構成の基本形で、特に物語や小論文で用いられる。', subPoints: ['起：物語の導入部。登場人物や状況設定。','承：「起」を受けて話を進め、深める部分。','転：場面や視点を変え、物語を大きく展開させる部分。','結：物語全体の締めくくり。結論や結末。'], examples: [] },
+                    { name: '序破急（じょはきゅう）', definition: '元は雅楽や能楽から来た言葉で、物事の展開のスピード感を表す。', subPoints: ['序：ゆっくりとした静かな始まり。','破：次第に複雑になり、速度を上げて展開する部分。','急：最高潮に達し、一気に結末へ向かう部分。'], examples: [] },
+                    { name: 'サンドイッチ構造', definition: '文章の冒頭と末尾で同じ、あるいは関連するテーマやフレーズを配置し、間に本文を挟む構成。統一感と印象を強める効果がある。', examples: [] },
+                    { name: '対比構造', definition: '二つの対照的な要素を並行して描き、その違いを際立たせることでテーマを明確にする構成。', examples: [] },
+                    { name: '問題提起・解決構造', definition: '文章の初めに読者に対して問題を提示し、本文でその原因や具体例を分析し、最後に解決策や結論を示す構成。説得力が高い。', examples: [] },
+                ]
+            }
+        ];
+        
+        // --- アプリケーションのロジック ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('app-container');
+
+            categories.forEach(category => {
+                // セクションのラッパーを作成
+                const section = document.createElement('section');
+                section.className = 'mb-6 last:mb-0';
+                
+                // HTMLコンテンツを生成
+                section.innerHTML = `
+                    <button class="accordion-button flex justify-between items-center w-full p-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold text-xl rounded-xl shadow-md hover:shadow-lg transform hover:scale-102 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-opacity-75">
+                        <span>${category.title}</span>
+                        <svg class="w-6 h-6 transform transition-transform duration-300 rotate-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="bg-white bg-opacity-70 backdrop-blur-xs p-4 rounded-xl shadow-md border border-gray-200">
+                            ${category.techniques.map((technique, index) => `
+                                <div class="technique-card mb-4 p-4 bg-blue-50 bg-opacity-80 rounded-lg shadow-md border border-blue-100 last:mb-0" data-tech-name="${technique.name}" data-tech-def="${technique.definition}">
+                                    <h3 class="text-lg font-bold text-indigo-700 mb-2">${technique.name}</h3>
+                                    <p class="text-gray-800 leading-relaxed mb-2">${technique.definition}</p>
+                                    ${technique.examples && technique.examples.length > 0 ? `
+                                        <div class="mt-3">
+                                            <p class="font-semibold text-purple-600 mb-1">例：</p>
+                                            <ul class="list-disc list-inside text-gray-700">
+                                                ${technique.examples.map(ex => `<li class="mb-1">${ex}</li>`).join('')}
+                                            </ul>
+                                        </div>
+                                    ` : ''}
+                                    ${technique.subPoints && technique.subPoints.length > 0 ? `
+                                        <div class="mt-3">
+                                            <p class="font-semibold text-purple-600 mb-1">構成要素：</p>
+                                            <ul class="list-disc list-inside text-gray-700">
+                                                ${technique.subPoints.map(sp => `<li class="mb-1">${sp}</li>`).join('')}
+                                            </ul>
+                                        </div>
+                                    ` : ''}
+                                    <div class="mt-4 pt-4 border-t border-gray-200">
+                                        <button class="toggle-generator-btn w-full py-2 px-4 bg-indigo-500 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75">
+                                            ✨ 新しい例文を生成
+                                        </button>
+                                        <div class="generator-ui hidden mt-4 p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+                                            <label class="block text-sm font-medium text-indigo-700 mb-1">
+                                                キーワードを入力してください（任意）：
+                                            </label>
+                                            <input type="text" placeholder="例: 春、友情、未来" class="keyword-input w-full p-2 border border-indigo-300 rounded-md focus:ring-indigo-400 focus:border-indigo-400 text-gray-800" />
+                                            <button class="generate-btn mt-3 w-full py-2 px-4 rounded-lg shadow-md transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 bg-blue-600 text-white hover:bg-blue-700">
+                                                生成
+                                            </button>
+                                            <div class="result-container mt-3"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(section);
+            });
+
+            // --- イベントリスナーの設定 ---
+            
+            // アコーディオン機能
+            container.addEventListener('click', (e) => {
+                const button = e.target.closest('.accordion-button');
+                if (button) {
+                    const content = button.nextElementSibling;
+                    const icon = button.querySelector('svg');
+                    content.classList.toggle('open');
+                    icon.classList.toggle('rotate-180');
+                }
+            });
+
+            // 例文生成UIの表示/非表示
+            container.addEventListener('click', (e) => {
+                const button = e.target.closest('.toggle-generator-btn');
+                if (button) {
+                    const ui = button.nextElementSibling;
+                    ui.classList.toggle('hidden');
+                }
+            });
+
+            // 例文生成機能
+            container.addEventListener('click', async (e) => {
+                const button = e.target.closest('.generate-btn');
+                if (button) {
+                    const card = button.closest('.technique-card');
+                    const techName = card.dataset.techName;
+                    const techDef = card.dataset.techDef;
+                    const keyword = card.querySelector('.keyword-input').value;
+                    const resultContainer = card.querySelector('.result-container');
+                    
+                    button.disabled = true;
+                    button.textContent = '生成中...';
+                    button.classList.add('bg-gray-400', 'cursor-not-allowed');
+                    resultContainer.innerHTML = '';
+
+                    try {
+                        const generatedText = await generateExample(techName, techDef, keyword);
+                        resultContainer.innerHTML = `
+                            <div class="mt-4 p-3 bg-blue-100 rounded-md border border-blue-200">
+                                <p class="font-semibold text-blue-800 mb-1">AIが生成した例文：</p>
+                                <p class="text-gray-900">${generatedText}</p>
+                            </div>
+                        `;
+                    } catch (error) {
+                        resultContainer.innerHTML = `<p class="mt-3 text-red-600 text-sm">${error.message}</p>`;
+                    } finally {
+                        button.disabled = false;
+                        button.textContent = '生成';
+                        button.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                    }
+                }
+            });
+        });
+        
+        // --- API呼び出し関数 ---
+        async function generateExample(name, definition, keyword) {
+            // ▼▼▼▼▼【重要】ここにあなたのGemini APIキーを入力してください ▼▼▼▼▼
+            const API_KEY = ""; // 例: "AIzaSy..."
+            // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+            
+            if (!API_KEY) {
+                throw new Error("APIキーが設定されていません。コード内の 'API_KEY' 変数にあなたのキーを入力してください。");
+            }
+            
+            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`;
+            
+            const prompt = `
+              以下の表現技法とキーワードを使って、創造的で分かりやすい例文を1つだけ生成してください。
+              ・生成する例文は、必ず1文または2文で完結させてください。
+              ・前置きや解説は一切含めず、例文そのものだけを出力してください。
+
+              表現技法名: ${name}
+              表現技法定義: ${definition}
+              キーワード: ${keyword || '指定なし'}
+            `;
+
+            const payload = {
+                contents: [{
+                    parts: [{ text: prompt }]
+                }]
+            };
+
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('API Error:', errorData);
+                throw new Error(`APIリクエストに失敗しました (ステータス: ${response.status})。APIキーが正しいか、有効期限を確認してください。`);
+            }
+            
+            const result = await response.json();
+
+            if (result.candidates && result.candidates[0] && result.candidates[0].content && result.candidates[0].content.parts[0]) {
+                return result.candidates[0].content.parts[0].text.trim().replace(/\*\*|\*/g, '');
+            } else {
+                console.error('Unexpected API response format:', result);
+                throw new Error('例文の生成に失敗しました。予期せぬ形式のレスポンスです。');
+            }
+        }
+    </script>
+
+</body>
+</html>
